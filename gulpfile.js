@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var fs = require('fs');
+var sass = require('gulp-sass');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var babelify = require('babelify');
@@ -42,8 +43,16 @@ gulp.task('build-persistent', ['clean'], function() {
   return bundle();
 });
 
-gulp.task('build', ['build-persistent'], function() {
+gulp.task('build', ['build-persistent', 'sass'], function() {
   process.exit(0);
+});
+
+
+//Sass
+gulp.task('sass', function () {
+    return gulp.src('./sass/**/*.scss')
+        .pipe(sass.sync().on('error', sass.logError))
+        .pipe(gulp.dest('./css'));
 });
 
 gulp.task('watch', ['build-persistent'], function() {
