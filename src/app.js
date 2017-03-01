@@ -1,38 +1,30 @@
+import 'babel-polyfill';
 import {Person} from './model/Person';
-import { createStore } from 'redux';
-import todoApp from './reducers';
+import { createStore, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk';
+import createLogger from 'redux-logger';
+import reducers from './reducers';
+import { selectSubreddit, fetchPosts } from './actions';
 import $ from 'jquery';
 
-const store = createStore(todoApp);
+const loggerMiddleware = createLogger();
+
+const store = createStore(
+    reducers,
+    applyMiddleware(
+        thunkMiddleware, // lets us dispatch() functions
+        loggerMiddleware // neat middleware that logs actions
+    )
+);
 
 global.app = function () {
 
     var christoph = new Person('Christoph', 'Burgdorf');
-    //console.log(christoph.fullName);
+
+    store.dispatch(selectSubreddit('reactjs'))
+    store.dispatch(fetchPosts('reactjs')).then(() =>
+        console.log(store.getState())
+    )
+
 };
 
-global.addTodo = function () {
-
-    let textVal = $('#newTodo').val();
-    let tableElement = $('#todos');
-
-    //Add Todo Action
-    store.dispatch({type: 'ADD_TODO', id: 1, text: textVal});
-
-    let state = store.getState();
-    let todosInState = state.todos;
-
-    tableElement.find('tbody').empty();
-
-    for (var idx in todosInState) {
-
-        let item = todosInState[idx];
-
-        tableElement.append(
-            '<tr> ' +
-                '<td> ' + item.id + ' </td>' +
-                '<td> ' + item.text + ' </td>' +
-            '</tr>'
-        );
-    }
-};
